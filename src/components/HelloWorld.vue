@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { switchLocale } from "@/i18n";
 import heroImg from "@/assets/hero.png";
 import viteLogo from "@/assets/vite.svg";
 import vueLogo from "@/assets/vue.svg";
@@ -9,6 +10,12 @@ const count = ref(0);
 
 <template>
   <section id="center">
+    <div>
+      <h2>{{ $t("hello") }}</h2>
+      <button type="button" class="counter" @click="switchLocale">
+        Switch language
+      </button>
+    </div>
     <div class="hero">
       <img :src="heroImg" class="base" width="170" height="179" alt="" />
       <img :src="vueLogo" class="framework" alt="Vue logo" />
