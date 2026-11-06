@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "build:ghpages": "vue-tsc -b && vite build --mode ghpages",
     "preview": "vite preview",
     "format": "prettier . --write"
   },
