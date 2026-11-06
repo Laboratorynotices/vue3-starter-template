@@ -1,7 +1,5 @@
 import { createI18n } from "vue-i18n";
-/* TODO: Создать модуль для SEO утилит с updateSEO
 import { updateSEO } from "@/utils/seoUtils";
-*/
 
 /**
  * Массив поддерживаемых языковых локалей в приложении
@@ -114,10 +112,8 @@ export const setLocale = async (locale: AvailableLocale): Promise<void> => {
     console.warn("Не удалось сохранить локаль в localStorage:", error);
   }
 
-  // TODO: Перенести обновление атрибута lang и SEO в отдельную утилиту,
-  // например await updateSEO();
-  // Обновляем атрибут lang на элементе <html> для корректной семантики
-  document.documentElement.lang = locale;
+  // Обновляет SEO теги и атрибут lang в <html>
+  await updateSEO();
 };
 
 /**
@@ -213,7 +209,7 @@ export const initLocale = async (): Promise<void> => {
  * Используется для подключения интернационализации к Vue приложению
  *
  * Пример использования:
- * import i18n from './i18n';
+ * import i18n from '@/i18n';
  * app.use(i18n);
  */
 export default i18n;
