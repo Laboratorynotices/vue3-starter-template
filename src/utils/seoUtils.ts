@@ -1,16 +1,24 @@
 import i18n from "@/i18n";
+import { apiGet, type ApiResponse } from "./apiUtils";
+import { toPlainText } from "./sanitizeUtils";
+
+const SEO_ENDPOINT = "seo";
+
+/** Ядро SEO-данных, полученных по API */
+interface SeoItem {
+  title: string;
+  description: string;
+  keywords: string;
+}
+
+/** SEO-данные, полученные по API */
+interface SeoResponse extends ApiResponse {
+  seo: SeoItem;
+}
 
 /**
- * Константы для ключей переводов SEO
- */
-const SEO_KEYS = {
-  TITLE: "seo.title",
-  DESCRIPTION: "seo.description",
-  KEYWORDS: "seo.keywords",
-} as const;
-
-/**
- * Обновляет мета-тег или создает его, если не существует
+ * Обновляет или создаёт meta-тег с указанным name и content.
+ * Если тег с таким name уже есть, то его content перезаписывается.
  */
 const updateMetaTag = (name: string, content: string): void => {
   let metaTag = document.querySelector<HTMLMetaElement>(`meta[name='${name}']`);
@@ -25,31 +33,41 @@ const updateMetaTag = (name: string, content: string): void => {
 };
 
 /**
- * Обновляет SEO с кастомными ключами переводов
- * Полезно для страниц с индивидуальными SEO данными
+ * Применяет SEO-данные к странице как есть.
+ * Для данных, полученных по API.
  */
-export const updateSEOWithKeys = (
-  titleKey: string = SEO_KEYS.TITLE,
-  descriptionKey: string = SEO_KEYS.DESCRIPTION,
-  keywordsKey: string = SEO_KEYS.KEYWORDS,
-): void => {
-  // Заголовок страницы
-  document.title = i18n.global.t(titleKey);
-
-  // <meta name="description">
-  updateMetaTag("description", i18n.global.t(descriptionKey));
-
-  // <meta name="keywords">
-  updateMetaTag("keywords", i18n.global.t(keywordsKey));
-
-  // Установка языка в <html lang="">
+const applySeo = (seo: SeoItem): void => {
+  document.title = toPlainText(seo.title, 200);
+  updateMetaTag("description", toPlainText(seo.description, 500));
+  updateMetaTag("keywords", toPlainText(seo.keywords, 500));
   document.documentElement.setAttribute("lang", i18n.global.locale.value);
 };
 
 /**
- * Обновляет SEO теги на основе текущих переводов i18n
- * Вызывается при смене языка в i18n конфигурации
+ * Получает SEO-данные по API.
+ * @throws {Error} Если произошла ошибка сети, парсинга или валидации данных.
+ * @returns {Promise<SeoResponse>} SEO-данные.
  */
-export const updateSEO = (): void => {
-  updateSEOWithKeys(SEO_KEYS.TITLE, SEO_KEYS.DESCRIPTION, SEO_KEYS.KEYWORDS);
+export const fetchSeo = async (): Promise<SeoResponse> => {
+  const data = await apiGet<SeoResponse>(
+    `${SEO_ENDPOINT}/${i18n.global.locale.value}.json`,
+  );
+
+  if (!data.seo) {
+    throw new Error("Invalid SEO data received from API");
+  }
+
+  return data;
+};
+
+/**
+ * Обновляет SEO-данные с использованием данных, полученных по API.
+ */
+export const updateSEO = async (): Promise<void> => {
+  try {
+    const data = await fetchSeo();
+    applySeo(data.seo);
+  } catch (error) {
+    console.error("Failed to update SEO tags:", error);
+  }
 };

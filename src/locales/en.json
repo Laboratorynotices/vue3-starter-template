@@ -1,8 +1,3 @@
 {
-  "hello": "Hello",
-  "seo": {
-    "title": "Site Title",
-    "description": "Site Description",
-    "keywords": "key words"
-  }
+  "hello": "Hello"
 }
