@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 
@@ -17,6 +18,11 @@ export default defineConfig(({ mode }) => {
     define: {
       // __APP_BASE__ - глобальная переменная, содержащая базовый путь приложения
       __APP_BASE__: JSON.stringify(base),
+    },
+    // Настройки Vitest для Vue-компонентов
+    test: {
+      globals: true, // Позволяет не импортировать describe, test, expect в каждом файле
+      environment: "happy-dom", // Имитирует среду браузера (DOM) в памяти
     },
   };
 });
